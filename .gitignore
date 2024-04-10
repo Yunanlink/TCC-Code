@@ -1,32 +1,69 @@
-# Prerequisites
-*.d
+#include <LiquidCrystal.h>      // usando a biblioteca LiquidCrystal
 
-# Compiled Object files
-*.slo
-*.lo
-*.o
-*.obj
+const int rs = 8, en = 9, d4 = 4, d5 = 5, d6 = 6, d7 = 7; //definicao dos pinos do Display
+LiquidCrystal lcd(rs, en, d4, d5, d6, d7);                // configurando os pinos
+int thisChar = 0 ;
+int PinTrigger = 2; // Pino usado para disparar os pulsos do sensor
+int PinEcho = 3; // pino usado para ler a saida do sensor
+float TempoEcho = 0;
+const float VelocidadeSom_mpors = 340; // em metros por segundo
+const float VelocidadeSom_mporus = 0.000340; // em metros por microsegundo
 
-# Precompiled Headers
-*.gch
-*.pch
+void setup()
+{
+  lcd.begin(16, 2);               // definindo o LCD - 16 colunas e 2 linhas
+// Configura pino de Trigger como saída e inicializa com nível baixo
+  pinMode(PinTrigger, OUTPUT);
+  digitalWrite(PinTrigger, LOW);
+  pinMode(PinEcho, INPUT); // configura pino ECHO como entrada
+  // Inicializa a porta serial
+  Serial.begin(9600);
+  delay(100);
+}
 
-# Compiled Dynamic libraries
-*.so
-*.dylib
-*.dll
+void Hello ()                     // imprimindo mensagem
+{
+  
+}
 
-# Fortran module files
-*.mod
-*.smod
+void loop()
+{
+   
+  // Envia pulso para o disparar o sensor
+  DisparaPulsoUltrassonico();
+  // Mede o tempo de duração do sinal no pino de leitura(us)
+  TempoEcho = pulseIn(PinEcho, HIGH);
+  float distancia_metros = CalculaDistancia(TempoEcho);
+  
+  Serial.println("Distancia em metros: ");
+  Serial.println(distancia_metros);
+  Serial.println("Distancia em centimetros: ");
+  Serial.println(distancia_metros * 100);
 
-# Compiled Static libraries
-*.lai
-*.la
-*.a
-*.lib
+  // Imprime no LCD
+  lcd.clear();
+  lcd.setCursor(0, 0);
+  lcd.print("Distancia em m:");
+  lcd.setCursor(0, 1);
+  lcd.print(distancia_metros);
 
-# Executables
-*.exe
-*.out
-*.app
+  // aguarda um pouco antes de começar tudo de novo
+  delay(2000);
+  
+  Hello ();         // imprimindo mensagem
+}
+
+// Funçao para enviar o pulso de trigger
+void DisparaPulsoUltrassonico(){
+  // Para fazer o HC-SR04 enviar um pulso ultrassonico, nos temos
+  // que enviar para o pino de trigger um sinal de nivel alto
+  // com pelo menos 10us de duraçao
+  digitalWrite(PinTrigger, HIGH);
+  delayMicroseconds(10);
+  digitalWrite(PinTrigger, LOW);
+}
+
+// Função para calcular a distancia em metros
+float CalculaDistancia(float tempo_us){
+  return((tempo_us * VelocidadeSom_mporus) / 2);
+}
