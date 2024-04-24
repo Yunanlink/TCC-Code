@@ -1,37 +1,36 @@
-#include <LiquidCrystal.h>      // usando a biblioteca LiquidCrystal
+#include <LiquidCrystal.h>      // using the LiquidCrystal library
 
-const int rs = 8, en = 9, d4 = 4, d5 = 5, d6 = 6, d7 = 7; //definicao dos pinos do Display
-LiquidCrystal lcd(rs, en, d4, d5, d6, d7);                // configurando os pinos
-int thisChar = 0 ;
-int PinTrigger = 2; // Pino usado para disparar os pulsos do sensor
-int PinEcho = 3; // pino usado para ler a saida do sensor
+const int rs = 8, en = 9, d4 = 4, d5 = 5, d6 = 6, d7 = 7; // definition of Display pins
+LiquidCrystal lcd(rs, en, d4, d5, d6, d7);                // configuring the pins
+int PinTrigger = 2; // Pin used to trigger sensor pulses
+int PinEcho = 3; // pin used to read sensor output
 float TempoEcho = 0;
-const float VelocidadeSom_mpors = 340; // em metros por segundo
-const float VelocidadeSom_mporus = 0.000340; // em metros por microsegundo
+const float VelocidadeSom_mpors = 340; // in meters per second
+const float VelocidadeSom_mporus = 0.000340; // in meters per microsecond
 
 void setup()
 {
-  lcd.begin(16, 2);               // definindo o LCD - 16 colunas e 2 linhas
-// Configura pino de Trigger como saída e inicializa com nível baixo
+  lcd.begin(16, 2);               // defining the LCD - 16 columns and 2 rows
+  // Configure Trigger pin as output and initialize with low level
   pinMode(PinTrigger, OUTPUT);
   digitalWrite(PinTrigger, LOW);
-  pinMode(PinEcho, INPUT); // configura pino ECHO como entrada
-  // Inicializa a porta serial
+  pinMode(PinEcho, INPUT); // configure ECHO pin as input
+  // Initialize serial port
   Serial.begin(9600);
   delay(100);
 }
 
-void Hello ()                     // imprimindo mensagem
+void Hello ()                     // printing message
 {
-  
+  // Function body
 }
 
 void loop()
 {
    
-  // Envia pulso para o disparar o sensor
+  // Send pulse to trigger the sensor
   DisparaPulsoUltrassonico();
-  // Mede o tempo de duração do sinal no pino de leitura(us)
+  // Measure the duration time of the signal at the read pin(us)
   TempoEcho = pulseIn(PinEcho, HIGH);
   float distancia_metros = CalculaDistancia(TempoEcho);
   
@@ -40,30 +39,35 @@ void loop()
   Serial.println("Distancia em centimetros: ");
   Serial.println(distancia_metros * 100);
 
-  // Imprime no LCD
+  // Calculate percentage
+  float porcentagem = (distancia_metros / 3.36) * 100;
+
+  // Print on LCD
   lcd.clear();
   lcd.setCursor(0, 0);
-  lcd.print("Distancia em m:");
+  lcd.print("Reservatorio:");
   lcd.setCursor(0, 1);
-  lcd.print(distancia_metros);
+  lcd.setCursor(10, 1);
+  lcd.print(porcentagem);
+  lcd.print("%");
 
-  // aguarda um pouco antes de começar tudo de novo
+  // Wait a bit before starting over
   delay(2000);
   
-  Hello ();         // imprimindo mensagem
+  Hello ();         // printing message
 }
 
-// Funçao para enviar o pulso de trigger
+// Function to send ultrasonic pulse
 void DisparaPulsoUltrassonico(){
-  // Para fazer o HC-SR04 enviar um pulso ultrassonico, nos temos
-  // que enviar para o pino de trigger um sinal de nivel alto
-  // com pelo menos 10us de duraçao
+  // To make the HC-SR04 send an ultrasonic pulse, we need
+  // to send a high level signal to the trigger pin
+  // with at least 10us duration
   digitalWrite(PinTrigger, HIGH);
   delayMicroseconds(10);
   digitalWrite(PinTrigger, LOW);
 }
 
-// Função para calcular a distancia em metros
+// Function to calculate distance in meters
 float CalculaDistancia(float tempo_us){
   return((tempo_us * VelocidadeSom_mporus) / 2);
 }
