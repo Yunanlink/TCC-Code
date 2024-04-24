@@ -8,6 +8,9 @@ float TempoEcho = 0;
 const float VelocidadeSom_mpors = 340; // in meters per second
 const float VelocidadeSom_mporus = 0.000340; // in meters per microsecond
 
+unsigned long previousMillis = 0; // Store the last time the main loop was executed
+const long interval = 2000; // Interval in milliseconds
+
 void setup()
 {
   lcd.begin(16, 2);               // defining the LCD - 16 columns and 2 rows
@@ -27,34 +30,38 @@ void Hello ()                     // printing message
 
 void loop()
 {
-   
-  // Send pulse to trigger the sensor
-  DisparaPulsoUltrassonico();
-  // Measure the duration time of the signal at the read pin(us)
-  TempoEcho = pulseIn(PinEcho, HIGH);
-  float distancia_metros = CalculaDistancia(TempoEcho);
+  unsigned long currentMillis = millis(); // Get the current time
   
-  Serial.println("Distancia em metros: ");
-  Serial.println(distancia_metros);
-  Serial.println("Distancia em centimetros: ");
-  Serial.println(distancia_metros * 100);
-
-  // Calculate percentage
-  float porcentagem = (distancia_metros / 3.36) * 100;
-
-  // Print on LCD
-  lcd.clear();
-  lcd.setCursor(0, 0);
-  lcd.print("Reservatorio:");
-  lcd.setCursor(0, 1);
-  lcd.setCursor(10, 1);
-  lcd.print(porcentagem);
-  lcd.print("%");
-
-  // Wait a bit before starting over
-  delay(2000);
+  // Check if it's time to execute the main loop
+  if (currentMillis - previousMillis >= interval) {
+    // Update the last time the main loop was executed
+    previousMillis = currentMillis;
+    
+    // Send pulse to trigger the sensor
+    DisparaPulsoUltrassonico();
+    // Measure the duration time of the signal at the read pin(us)
+    TempoEcho = pulseIn(PinEcho, HIGH);
+    float distancia_metros = CalculaDistancia(TempoEcho);
+    
+    Serial.println("Distancia em metros: ");
+    Serial.println(distancia_metros);
+    Serial.println("Distancia em centimetros: ");
+    Serial.println(distancia_metros * 100);
   
-  Hello ();         // printing message
+    // Calculate percentage
+    float porcentagem = (distancia_metros / 3.36) * 100;
+  
+    // Print on LCD
+    lcd.clear();
+    lcd.setCursor(0, 0);
+    lcd.print("Reservatorio:");
+    lcd.setCursor(0, 1);
+    lcd.setCursor(10, 1);
+    lcd.print(porcentagem);
+    lcd.print("%");
+  
+    Hello ();         // printing message
+  }
 }
 
 // Function to send ultrasonic pulse
