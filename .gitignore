@@ -2,6 +2,7 @@
 
 const int rs = 8, en = 9, d4 = 4, d5 = 5, d6 = 6, d7 = 7; // definition of Display pins
 LiquidCrystal lcd(rs, en, d4, d5, d6, d7);                // configuring the pins
+const int Signal = 12;
 int PinTrigger = 2; // Pin used to trigger sensor pulses
 int PinEcho = 3; // pin used to read sensor output
 float TempoEcho = 0;
@@ -15,6 +16,8 @@ void setup()
 {
   lcd.begin(16, 2);               // defining the LCD - 16 columns and 2 rows
   // Configure Trigger pin as output and initialize with low level
+  pinMode(Signal, OUTPUT);
+  digitalWrite(Signal, LOW);
   pinMode(PinTrigger, OUTPUT);
   digitalWrite(PinTrigger, LOW);
   pinMode(PinEcho, INPUT); // configure ECHO pin as input
@@ -60,7 +63,17 @@ void loop()
     lcd.print(porcentagem);
     lcd.print("%");
   
+   
     Hello ();         // printing message
+ 
+      // Control signal based on percentage
+    if (porcentagem < 50) {
+      digitalWrite(Signal, HIGH);
+    } else {
+      digitalWrite(Signal, LOW);
+    }
+    
+    
   }
 }
 
